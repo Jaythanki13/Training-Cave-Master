@@ -199,15 +199,12 @@ export const getStats = async (req, res) => {
       WHERE status = 'active'
     `);
 
-    // This week's stats
+    // This week's stats — three separate counts to avoid cartesian product
     const weekResult = await query(`
-      SELECT 
-        COUNT(DISTINCT u.id) FILTER (WHERE u.created_at >= NOW() - INTERVAL '7 days') as new_users,
-        COUNT(DISTINCT m.id) FILTER (WHERE m.uploaded_at >= NOW() - INTERVAL '7 days') as new_materials,
-        COUNT(d.id) FILTER (WHERE d.downloaded_at >= NOW() - INTERVAL '7 days') as week_downloads
-      FROM users u
-      FULL OUTER JOIN materials m ON 1=1
-      FULL OUTER JOIN downloads d ON 1=1
+      SELECT
+        (SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '7 days') AS new_users,
+        (SELECT COUNT(*) FROM materials WHERE uploaded_at >= NOW() - INTERVAL '7 days' AND status = 'active') AS new_materials,
+        (SELECT COUNT(*) FROM downloads WHERE downloaded_at >= NOW() - INTERVAL '7 days') AS week_downloads
     `);
 
     res.json({
