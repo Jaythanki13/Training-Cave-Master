@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Upload, BookOpen, Users, Shield, Download, ChevronRight, Mail, Lock, User, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Upload, BookOpen, Users, Shield, Download, ChevronRight, Mail, Lock, User, Check, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const TrainingCaveLanding = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -208,16 +210,37 @@ const Modal = ({ children, onClose, title }) => (
 );
 
 const LoginForm = ({ onSwitchToSignup }) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Login functionality will be connected to backend!');
+    setError('');
+    setLoading(true);
+    try {
+      const user = await login(email, password);
+      if (user.role === 'trainer') navigate('/trainer');
+      else if (user.role === 'super_admin') navigate('/admin');
+      else navigate('/learner');
+    } catch (err) {
+      setError(err.message || 'Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="flex items-center space-x-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3">
+          <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+          <span className="text-sm text-red-400">{error}</span>
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
         <div className="relative">
@@ -248,13 +271,14 @@ const LoginForm = ({ onSwitchToSignup }) => {
       </div>
       <button
         type="submit"
-        className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/30 font-semibold"
+        disabled={loading}
+        className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/30 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Sign In
+        {loading ? 'Signing in...' : 'Sign In'}
       </button>
       <p className="text-center text-slate-400 text-sm">
         Don't have an account?{' '}
-        <button 
+        <button
           type="button"
           onClick={onSwitchToSignup}
           className="text-amber-400 hover:text-amber-300"
@@ -267,36 +291,82 @@ const LoginForm = ({ onSwitchToSignup }) => {
 };
 
 const SignupForm = ({ onSwitchToLogin, initialRole }) => {
+  const { register } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
-    role: initialRole,
+    role: initialRole || 'learner',
     bio: '',
     expertise: '',
-    agreeTerms: false
+    agreeTerms: false,
   });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.agreeTerms) {
-      alert('Please agree to the terms of use');
-      return;
+    if (!formData.agreeTerms) { setError('Please agree to the terms of use'); return; }
+    setError('');
+    setLoading(true);
+    try {
+      const result = await register({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        bio: formData.bio || undefined,
+        expertise: formData.expertise || undefined,
+      });
+      if (result?.pending) {
+        setSuccess('Account created! Your trainer request has been sent to the admin. You\'ll receive an email once approved.');
+      } else {
+        navigate('/learner');
+      }
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    alert(`Signup will create ${formData.role} account and ${formData.role === 'trainer' ? 'send approval request to admin' : 'grant immediate access'}!`);
   };
+
+  if (success) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-5 flex items-start space-x-3">
+          <Check className="w-6 h-6 text-green-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-slate-300">{success}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onSwitchToLogin}
+          className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold"
+        >
+          Back to Sign In
+        </button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="flex items-center space-x-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3">
+          <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+          <span className="text-sm text-red-400">{error}</span>
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium text-slate-300 mb-2">I am a...</label>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => setFormData({...formData, role: 'learner'})}
+            onClick={() => setFormData({ ...formData, role: 'learner' })}
             className={`py-3 rounded-lg border-2 transition-all ${
-              formData.role === 'learner' 
-                ? 'border-amber-500 bg-amber-500/10 text-white' 
+              formData.role === 'learner'
+                ? 'border-amber-500 bg-amber-500/10 text-white'
                 : 'border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500'
             }`}
           >
@@ -305,10 +375,10 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
           </button>
           <button
             type="button"
-            onClick={() => setFormData({...formData, role: 'trainer'})}
+            onClick={() => setFormData({ ...formData, role: 'trainer' })}
             className={`py-3 rounded-lg border-2 transition-all ${
-              formData.role === 'trainer' 
-                ? 'border-amber-500 bg-amber-500/10 text-white' 
+              formData.role === 'trainer'
+                ? 'border-amber-500 bg-amber-500/10 text-white'
                 : 'border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500'
             }`}
           >
@@ -325,7 +395,7 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
           <input
             type="text"
             value={formData.fullName}
-            onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
             placeholder="John Doe"
             required
@@ -340,7 +410,7 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
           <input
             type="email"
             value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
             placeholder="you@example.com"
             required
@@ -355,9 +425,10 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
           <input
             type="password"
             value={formData.password}
-            onChange={(e) => setFormData({...formData, password: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
             placeholder="••••••••"
+            minLength={6}
             required
           />
         </div>
@@ -369,7 +440,7 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
             <label className="block text-sm font-medium text-slate-300 mb-2">Bio (Optional)</label>
             <textarea
               value={formData.bio}
-              onChange={(e) => setFormData({...formData, bio: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
               rows="2"
               placeholder="Tell us about your training experience..."
@@ -380,7 +451,7 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
             <input
               type="text"
               value={formData.expertise}
-              onChange={(e) => setFormData({...formData, expertise: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, expertise: e.target.value })}
               className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
               placeholder="e.g., Leadership, Soft Skills, Technical"
             />
@@ -393,20 +464,27 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
           <input
             type="checkbox"
             checked={formData.agreeTerms}
-            onChange={(e) => setFormData({...formData, agreeTerms: e.target.checked})}
+            onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
             className="mt-1 w-5 h-5 rounded border-slate-600 bg-slate-900 text-amber-500 focus:ring-amber-500"
           />
           <span className="text-sm text-slate-300">
-            I understand that materials uploaded are for <span className="text-amber-400 font-semibold">internal client use only</span>, not public distribution. My content remains my intellectual property.
+            I understand that materials uploaded are for{' '}
+            <span className="text-amber-400 font-semibold">internal client use only</span>, not public distribution.
+            My content remains my intellectual property.
           </span>
         </label>
       </div>
 
       <button
         type="submit"
-        className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/30 font-semibold"
+        disabled={loading}
+        className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/30 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {formData.role === 'trainer' ? 'Request Trainer Access' : 'Create Account'}
+        {loading
+          ? 'Creating account...'
+          : formData.role === 'trainer'
+          ? 'Request Trainer Access'
+          : 'Create Account'}
       </button>
 
       {formData.role === 'trainer' && (
@@ -420,7 +498,7 @@ const SignupForm = ({ onSwitchToLogin, initialRole }) => {
 
       <p className="text-center text-slate-400 text-sm">
         Already have an account?{' '}
-        <button 
+        <button
           type="button"
           onClick={onSwitchToLogin}
           className="text-amber-400 hover:text-amber-300"

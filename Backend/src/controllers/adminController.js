@@ -7,8 +7,9 @@ export const getPendingTrainers = async (req, res) => {
     const result = await query(
       `SELECT id, email, full_name, profile_bio, expertise_areas, created_at
        FROM users
-       WHERE role = 'trainer' AND status = 'pending'
-       ORDER BY created_at DESC`
+       WHERE role = $1 AND status = $2
+       ORDER BY created_at DESC`,
+      ['trainer', 'pending']
     );
 
     res.json({ trainers: result.rows });
@@ -24,9 +25,9 @@ export const approveTrainer = async (req, res) => {
     const { id } = req.params;
 
     // Get trainer details
-    const trainer Result = await query(
-      'SELECT email, full_name FROM users WHERE id = $1 AND role = $'trainer' AND status = $'pending'',
-      [id]
+    const trainerResult = await query(
+      'SELECT email, full_name FROM users WHERE id = $1 AND role = $2 AND status = $3',
+      [id, 'trainer', 'pending']
     );
 
     if (trainerResult.rows.length === 0) {
@@ -37,8 +38,8 @@ export const approveTrainer = async (req, res) => {
 
     // Update status to active
     await query(
-      'UPDATE users SET status = $'active', updated_at = CURRENT_TIMESTAMP WHERE id = $1',
-      [id]
+      'UPDATE users SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      ['active', id]
     );
 
     // Send approval email
@@ -58,8 +59,8 @@ export const rejectTrainer = async (req, res) => {
 
     // Get trainer details
     const trainerResult = await query(
-      'SELECT email, full_name FROM users WHERE id = $1 AND role = $'trainer' AND status = $'pending'',
-      [id]
+      'SELECT email, full_name FROM users WHERE id = $1 AND role = $2 AND status = $3',
+      [id, 'trainer', 'pending']
     );
 
     if (trainerResult.rows.length === 0) {
@@ -141,8 +142,8 @@ export const banUser = async (req, res) => {
     }
 
     await query(
-      'UPDATE users SET status = $'banned', updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [id]
+      'UPDATE users SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      ['banned', id]
     );
 
     res.json({ message: 'User banned successfully' });
@@ -158,8 +159,8 @@ export const unbanUser = async (req, res) => {
     const { id } = req.params;
 
     await query(
-      'UPDATE users SET status = $'active', updated_at = CURRENT_TIMESTAMP WHERE id = $1',
-      [id]
+      'UPDATE users SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      ['active', id]
     );
 
     res.json({ message: 'User unbanned successfully' });
