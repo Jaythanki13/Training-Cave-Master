@@ -25,7 +25,7 @@ export const uploadToS3 = async (file, folder = 'materials') => {
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'private', // Files are private, require signed URLs
+      // ACL omitted — objects are private by default in S3
     };
 
     const result = await s3.upload(params).promise();
