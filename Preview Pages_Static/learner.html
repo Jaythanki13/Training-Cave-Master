@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learner Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Welcome back, John!</h1>
+        <p class="text-slate-400 mb-8">Explore our training library and continue learning</p>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">1,245</div>
+                <div class="text-sm text-slate-400">Total Materials</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">23</div>
+                <div class="text-sm text-slate-400">Your Downloads</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">12</div>
+                <div class="text-sm text-slate-400">Saved</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">45</div>
+                <div class="text-sm text-slate-400">New This Week</div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-8">
+            <input type="text" placeholder="Search materials, trainers, topics..." 
+                   class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white">
+        </div>
+
+        <p class="text-slate-400 mb-6">Showing <span class="text-white font-semibold">6</span> materials</p>
+
+        <!-- Materials Grid -->
+        <div class="grid grid-cols-3 gap-6">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all">
+                <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded">Soft Skills</span>
+                <h3 class="text-lg font-semibold text-white my-2">Effective Communication Skills</h3>
+                <p class="text-sm text-slate-400 mb-4">Master clear, persuasive communication...</p>
+                <button class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-lg">Download</button>
+            </div>
+
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all">
+                <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded">Technical Training</span>
+                <h3 class="text-lg font-semibold text-white my-2">Python for Data Analysis</h3>
+                <p class="text-sm text-slate-400 mb-4">Comprehensive Python programming guide...</p>
+                <button class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-lg">Download</button>
+            </div>
+
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all">
+                <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded">AI & Trending Technologies</span>
+                <h3 class="text-lg font-semibold text-white my-2">Machine Learning Basics</h3>
+                <p class="text-sm text-slate-400 mb-4">Introduction to ML algorithms...</p>
+                <button class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-lg">Download</button>
+            </div>
+
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all">
+                <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded">Security Training</span>
+                <h3 class="text-lg font-semibold text-white my-2">Cybersecurity Fundamentals</h3>
+                <p class="text-sm text-slate-400 mb-4">Essential security concepts...</p>
+                <button class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-lg">Download</button>
+            </div>
+
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all">
+                <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded">Official Certifications</span>
+                <h3 class="text-lg font-semibold text-white my-2">AWS Cloud Practitioner Prep</h3>
+                <p class="text-sm text-slate-400 mb-4">Complete certification guide...</p>
+                <button class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-lg">Download</button>
+            </div>
+
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all">
+                <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded">Healthcare Training</span>
+                <h3 class="text-lg font-semibold text-white my-2">Patient Care Standards</h3>
+                <p class="text-sm text-slate-400 mb-4">Healthcare compliance training...</p>
+                <button class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-lg">Download</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

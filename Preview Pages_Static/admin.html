@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <div class="flex items-center gap-2 mb-2">
+                <h1 class="text-3xl font-bold text-white">Admin Dashboard</h1>
+                <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/40 rounded-lg text-purple-300 text-sm font-semibold">
+                    🛡️ Admin
+                </span>
+            </div>
+            <p class="text-slate-400">Monitor platform activity and manage users</p>
+        </div>
+
+        <!-- Top Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">1,245</div>
+                <div class="text-sm text-slate-400">Total Users</div>
+                <div class="text-xs text-slate-500 mt-1">87 trainers, 1158 learners</div>
+            </div>
+            <div class="bg-slate-800/50 border border-amber-500/50 rounded-xl p-4 shadow-lg shadow-amber-500/20">
+                <div class="text-2xl font-bold text-white">12</div>
+                <div class="text-sm text-slate-400">Pending Approvals</div>
+                <div class="text-xs text-amber-400 mt-1">⚠️ Trainer applications</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">456</div>
+                <div class="text-sm text-slate-400">Total Materials</div>
+                <div class="text-xs text-slate-500 mt-1">+23 this week</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">45,678</div>
+                <div class="text-sm text-slate-400">Total Downloads</div>
+                <div class="text-xs text-slate-500 mt-1">+1234 this week</div>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold text-white mb-4">Pending Trainer Approvals</h2>
+
+        <!-- Pending Trainers -->
+        <div class="space-y-4">
+            <div class="bg-slate-800/50 border border-amber-500/30 rounded-xl p-6 shadow-lg shadow-amber-500/10">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                            AK
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Alex Kumar</h3>
+                            <p class="text-slate-400 text-sm">alex.kumar@example.com</p>
+                            <p class="text-xs text-slate-500 mt-1">⏰ Applied on 2024-04-20</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-lg text-amber-300 text-sm font-semibold">
+                        Pending Review
+                    </span>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold text-slate-300 mb-2">Bio</h4>
+                    <p class="text-slate-400 text-sm">Corporate trainer with 10+ years experience in leadership development and team building.</p>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-slate-300 mb-2">Expertise Areas</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-slate-700 rounded-full text-slate-300 text-sm">Leadership</span>
+                        <span class="px-3 py-1 bg-slate-700 rounded-full text-slate-300 text-sm">Team Building</span>
+                        <span class="px-3 py-1 bg-slate-700 rounded-full text-slate-300 text-sm">Communication</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold">
+                        ✅ Approve Trainer
+                    </button>
+                    <button class="flex-1 bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-3 rounded-lg font-semibold">
+                        ❌ Reject
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 border border-amber-500/30 rounded-xl p-6 shadow-lg shadow-amber-500/10">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                            MG
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Maria Garcia</h3>
+                            <p class="text-slate-400 text-sm">maria.garcia@example.com</p>
+                            <p class="text-xs text-slate-500 mt-1">⏰ Applied on 2024-04-21</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-lg text-amber-300 text-sm font-semibold">
+                        Pending Review
+                    </span>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold text-slate-300 mb-2">Bio</h4>
+                    <p class="text-slate-400 text-sm">Tech instructor specializing in Python, data analytics, and cloud computing.</p>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-slate-300 mb-2">Expertise Areas</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-slate-700 rounded-full text-slate-300 text-sm">Python</span>
+                        <span class="px-3 py-1 bg-slate-700 rounded-full text-slate-300 text-sm">Data Science</span>
+                        <span class="px-3 py-1 bg-slate-700 rounded-full text-slate-300 text-sm">Cloud</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold">
+                        ✅ Approve Trainer
+                    </button>
+                    <button class="flex-1 bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-3 rounded-lg font-semibold">
+                        ❌ Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Cave - Platform Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+        .preview-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border-bottom: 2px solid #f59e0b;
+            padding: 1rem;
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .preview-nav button {
+            background: #f59e0b;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .preview-nav button:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        .preview-nav button.active {
+            background: #0ea5e9;
+        }
+        .page-content {
+            margin-top: 80px;
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(245, 158, 11, 0.9);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            z-index: 999;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Preview Navigation -->
+    <div class="preview-nav">
+        <button onclick="showPage('landing')" id="btn-landing" class="active">🏠 Landing Page</button>
+        <button onclick="showPage('learner')" id="btn-learner">📚 Learner Dashboard</button>
+        <button onclick="showPage('trainer')" id="btn-trainer">👨‍🏫 Trainer Dashboard</button>
+        <button onclick="showPage('admin')" id="btn-admin">👑 Admin Panel</button>
+    </div>
+
+    <!-- Watermark -->
+    <div class="watermark">
+        🗿 STATIC PREVIEW - Install to see full functionality
+    </div>
+
+    <!-- Landing Page -->
+    <div id="page-landing" class="page-content active">
+        <iframe src="landing.html" style="width: 100%; height: calc(100vh - 80px); border: none;"></iframe>
+    </div>
+
+    <!-- Learner Dashboard -->
+    <div id="page-learner" class="page-content">
+        <iframe src="learner.html" style="width: 100%; height: calc(100vh - 80px); border: none;"></iframe>
+    </div>
+
+    <!-- Trainer Dashboard -->
+    <div id="page-trainer" class="page-content">
+        <iframe src="trainer.html" style="width: 100%; height: calc(100vh - 80px); border: none;"></iframe>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="page-admin" class="page-content">
+        <iframe src="admin.html" style="width: 100%; height: calc(100vh - 80px); border: none;"></iframe>
+    </div>
+
+    <script>
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.preview-nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById('page-' + pageName).classList.add('active');
+            document.getElementById('btn-' + pageName).classList.add('active');
+        }
+    </script>
+</body>
+</html>

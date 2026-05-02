@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-start mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Welcome back, Sarah!</h1>
+                <p class="text-slate-400">Manage your training materials and track engagement</p>
+            </div>
+            <button class="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-3 rounded-lg font-semibold">
+                + Upload Material
+            </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">12</div>
+                <div class="text-sm text-slate-400">Total Uploads</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">1,845</div>
+                <div class="text-sm text-slate-400">Total Downloads</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">4.7<span class="text-lg text-slate-400">/5.0</span></div>
+                <div class="text-sm text-slate-400">Avg. Rating</div>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div class="text-2xl font-bold text-white">234<span class="text-lg text-slate-400"> downloads</span></div>
+                <div class="text-sm text-slate-400">This Month</div>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold text-white mb-4">My Materials</h2>
+
+        <!-- Materials List -->
+        <div class="space-y-4">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-white mb-2">Effective Communication Skills for Leaders</h3>
+                        <div class="flex items-center gap-4 text-sm text-slate-400 mb-3">
+                            <span class="bg-slate-900 px-2 py-1 rounded text-xs">Soft Skills</span>
+                            <span>PDF • 12.5 MB</span>
+                            <span>2024-04-15</span>
+                        </div>
+                        <div class="flex items-center gap-6 text-sm">
+                            <span class="text-blue-400">234 downloads</span>
+                            <span class="text-amber-400">4.8 rating</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-2 bg-slate-700 rounded-lg text-slate-300">👁️</button>
+                        <button class="p-2 bg-slate-700 rounded-lg text-slate-300">✏️</button>
+                        <button class="p-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-white mb-2">Advanced Excel Formulas Workshop</h3>
+                        <div class="flex items-center gap-4 text-sm text-slate-400 mb-3">
+                            <span class="bg-slate-900 px-2 py-1 rounded text-xs">Technical Training</span>
+                            <span>PPTX • 45.2 MB</span>
+                            <span>2024-04-10</span>
+                        </div>
+                        <div class="flex items-center gap-6 text-sm">
+                            <span class="text-blue-400">156 downloads</span>
+                            <span class="text-amber-400">4.6 rating</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-2 bg-slate-700 rounded-lg text-slate-300">👁️</button>
+                        <button class="p-2 bg-slate-700 rounded-lg text-slate-300">✏️</button>
+                        <button class="p-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-white mb-2">Team Building Activities Guide</h3>
+                        <div class="flex items-center gap-4 text-sm text-slate-400 mb-3">
+                            <span class="bg-slate-900 px-2 py-1 rounded text-xs">Soft Skills</span>
+                            <span>DOCX • 8.9 MB</span>
+                            <span>2024-03-28</span>
+                        </div>
+                        <div class="flex items-center gap-6 text-sm">
+                            <span class="text-blue-400">423 downloads</span>
+                            <span class="text-amber-400">4.9 rating</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-2 bg-slate-700 rounded-lg text-slate-300">👁️</button>
+                        <button class="p-2 bg-slate-700 rounded-lg text-slate-300">✏️</button>
+                        <button class="p-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
