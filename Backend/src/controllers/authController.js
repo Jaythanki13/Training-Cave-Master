@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from '../config/database.js';
-import { sendEmail } from '../utils/email.js';
+import { sendEmail, sendWelcomeEmail } from '../utils/email.js';
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -88,6 +88,9 @@ export const register = async (req, res) => {
 
     // For learners, return token immediately
     const token = generateToken(user.id);
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(email.toLowerCase(), fullName).catch(() => {});
 
     res.status(201).json({
       message: 'Registration successful!',

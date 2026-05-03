@@ -89,6 +89,26 @@ export const sendTrainerRejectedEmail = async (trainerEmail, trainerName) => {
   });
 };
 
+export const sendWelcomeEmail = async (userEmail, userName) => {
+  await sendEmail({
+    to: userEmail,
+    subject: '🎉 Welcome to Training Cave!',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #f59e0b;">Welcome to Training Cave, ${userName}!</h2>
+        <p>Your learner account has been created. You can now browse and download training materials from our library.</p>
+        <p>
+          <a href="${process.env.FRONTEND_URL}/learner"
+             style="background-color: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+            Start Learning
+          </a>
+        </p>
+        <p>Best regards,<br>Training Cave Team</p>
+      </div>
+    `
+  });
+};
+
 export const sendMaterialUploadedNotification = async (materialTitle, trainerName) => {
   await sendEmail({
     to: process.env.ADMIN_EMAIL,

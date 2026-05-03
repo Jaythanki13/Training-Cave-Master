@@ -79,6 +79,25 @@ export const materials = {
   delete: (id) => request(`/materials/${id}`, { method: 'DELETE' }),
 
   getDownloadUrl: (id) => request(`/materials/${id}/download`),
+
+  rate: (id, rating, review) =>
+    request(`/materials/${id}/rate`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, review }),
+    }),
+
+  getRatings: (id) => request(`/materials/${id}/ratings`),
+
+  toggleBookmark: (id) =>
+    request(`/materials/${id}/bookmark`, { method: 'POST' }),
+
+  getBookmarked: () => request('/materials/bookmarked'),
+
+  getBookmarkedIds: () => request('/materials/bookmarked/ids'),
+};
+
+export const trainers = {
+  getProfile: (id) => request(`/trainers/${id}`),
 };
 
 export const admin = {
