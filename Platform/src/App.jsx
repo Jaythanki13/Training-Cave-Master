@@ -6,6 +6,8 @@ import LearnerDashboard from './pages/LearnerDashboard'
 import TrainerDashboard from './pages/TrainerDashboard'
 import AdminPanel from './pages/AdminPanel'
 import TrainerProfile from './pages/TrainerProfile'
+import AboutPage from './pages/AboutPage'
+import ContactPage from './pages/ContactPage'
 
 // Redirects logged-in users away from the landing page to their dashboard
 function PublicRoute({ children }) {
@@ -46,6 +48,8 @@ function App() {
         <Route path="/learner" element={<ProtectedRoute role="learner"><LearnerDashboard /></ProtectedRoute>} />
         <Route path="/trainer" element={<ProtectedRoute role="trainer"><TrainerDashboard /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute role="super_admin"><AdminPanel /></ProtectedRoute>} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/trainers/:id" element={<TrainerProfile />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

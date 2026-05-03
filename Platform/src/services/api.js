@@ -100,6 +100,11 @@ export const trainers = {
   getProfile: (id) => request(`/trainers/${id}`),
 };
 
+export const contact = {
+  submit: (payload) =>
+    request('/contact', { method: 'POST', body: JSON.stringify(payload) }),
+};
+
 export const admin = {
   getStats: () => request('/admin/stats'),
 

@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.js';
 import materialsRoutes from './routes/materials.js';
 import adminRoutes from './routes/admin.js';
 import trainersRoutes from './routes/trainers.js';
+import contactRoutes from './routes/contact.js';
 
 // Load environment variables
 dotenv.config();
@@ -85,6 +86,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/materials', materialsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/trainers', trainersRoutes);
+app.use('/api/contact', contactRoutes);
 
 // 404 handler
 app.use((req, res) => {
