@@ -104,4 +104,9 @@ export const admin = {
   getMaterials: () => request('/admin/materials'),
 
   deleteMaterial: (id) => request(`/admin/materials/${id}`, { method: 'DELETE' }),
+
+  createTrainer: (payload) =>
+    request('/admin/trainers', { method: 'POST', body: JSON.stringify(payload) }),
+
+  getActiveTrainers: () => request('/admin/users?role=trainer&status=active'),
 };

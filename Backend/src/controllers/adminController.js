@@ -1,5 +1,42 @@
+import bcrypt from 'bcryptjs';
 import { query } from '../config/database.js';
 import { sendTrainerApprovedEmail, sendTrainerRejectedEmail } from '../utils/email.js';
+
+// Create trainer account directly (admin-initiated, pre-approved)
+export const createTrainer = async (req, res) => {
+  try {
+    const { fullName, email, password, bio, expertise } = req.body;
+
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ error: 'Full name, email and password are required' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const existing = await query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'A user with this email already exists' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const result = await query(
+      `INSERT INTO users (email, password_hash, full_name, role, status, profile_bio, expertise_areas)
+       VALUES ($1, $2, $3, 'trainer', 'active', $4, $5)
+       RETURNING id, email, full_name, role, status, created_at`,
+      [email, passwordHash, fullName, bio || null, expertise || null]
+    );
+
+    res.status(201).json({
+      message: 'Trainer account created successfully',
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Create trainer error:', error);
+    res.status(500).json({ error: 'Failed to create trainer account' });
+  }
+};
 
 // Get pending trainer applications
 export const getPendingTrainers = async (req, res) => {

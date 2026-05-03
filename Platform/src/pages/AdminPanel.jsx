@@ -2,11 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield, Users, BookOpen, Download, TrendingUp, CheckCircle, XCircle,
-  Clock, Search, Eye, Trash2, UserCheck, UserX, BarChart3, Calendar,
-  AlertTriangle, LogOut, AlertCircle, Star, FileText
+  Clock, Search, Trash2, UserCheck, UserX, BarChart3, Calendar,
+  AlertTriangle, LogOut, AlertCircle, Star, FileText, Plus,
+  Upload, X, Video, Music, Archive
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { admin as adminApi } from '../services/api';
+import { admin as adminApi, materials as materialsApi } from '../services/api';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,8 @@ const AdminPanel = () => {
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showCreateTrainer, setShowCreateTrainer] = useState(false);
+  const [showUploadOnBehalf, setShowUploadOnBehalf] = useState(false);
 
   // Debounce user search
   useEffect(() => {
@@ -267,15 +270,24 @@ const AdminPanel = () => {
         {/* ── All Users ── */}
         {selectedTab === 'all-users' && (
           <div>
-            <div className="mb-4 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search users by name or email..."
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
-              />
+            <div className="flex gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search users by name or email..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                />
+              </div>
+              <button
+                onClick={() => setShowCreateTrainer(true)}
+                className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-5 py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold shadow-lg shadow-orange-500/20 whitespace-nowrap"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Create Trainer</span>
+              </button>
             </div>
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden">
               <table className="w-full">
@@ -348,6 +360,15 @@ const AdminPanel = () => {
         {/* ── All Materials ── */}
         {selectedTab === 'all-materials' && (
           <div className="space-y-4">
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowUploadOnBehalf(true)}
+                className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-5 py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold shadow-lg shadow-orange-500/20"
+              >
+                <Upload className="w-5 h-5" />
+                <span>Upload on Behalf of Trainer</span>
+              </button>
+            </div>
             {materialsLoading && (
               <div className="space-y-4">
                 {[1, 2, 3].map(i => (
@@ -414,6 +435,28 @@ const AdminPanel = () => {
           <AnalyticsTab stats={stats} loading={statsLoading} />
         )}
       </div>
+
+      {/* Create Trainer Modal */}
+      {showCreateTrainer && (
+        <CreateTrainerModal
+          onClose={() => setShowCreateTrainer(false)}
+          onSuccess={(newUser) => {
+            setAllUsers(prev => [newUser, ...prev]);
+            setShowCreateTrainer(false);
+          }}
+        />
+      )}
+
+      {/* Upload on Behalf Modal */}
+      {showUploadOnBehalf && (
+        <UploadOnBehalfModal
+          onClose={() => setShowUploadOnBehalf(false)}
+          onSuccess={(material) => {
+            setAllMaterials(prev => [material, ...prev]);
+            setShowUploadOnBehalf(false);
+          }}
+        />
+      )}
 
       {/* Delete confirmation */}
       {deletingId && (
@@ -644,6 +687,275 @@ const AdminStatCard = ({ icon, label, value, subtext, color, alert = false }) =>
       <div className="text-2xl font-bold text-white mb-1">{value}</div>
       <div className="text-sm text-slate-400">{label}</div>
       {subtext && <div className="text-xs text-slate-500 mt-1">{subtext}</div>}
+    </div>
+  );
+};
+
+// ─── CreateTrainerModal ───────────────────────────────────────────────────────
+
+const CreateTrainerModal = ({ onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    fullName: '', email: '', password: '', bio: '', expertise: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const set = (k, v) => setFormData(p => ({ ...p, [k]: v }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const data = await adminApi.createTrainer(formData);
+      onSuccess(data.user);
+    } catch (err) {
+      setError(err.message || 'Failed to create trainer');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-white">Create Trainer Account</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-6 h-6" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && (
+            <div className="flex items-center space-x-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3">
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <span className="text-sm text-red-400">{error}</span>
+            </div>
+          )}
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+            <p className="text-sm text-slate-300">
+              The account will be <span className="text-green-400 font-semibold">immediately active</span> — no approval needed.
+              Share the credentials with the trainer and ask them to change their password after first login.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Full Name *</label>
+            <input type="text" value={formData.fullName} onChange={e => set('fullName', e.target.value)}
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+              placeholder="e.g. Sarah Johnson" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Email *</label>
+            <input type="email" value={formData.email} onChange={e => set('email', e.target.value)}
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+              placeholder="trainer@example.com" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Temporary Password *</label>
+            <input type="text" value={formData.password} onChange={e => set('password', e.target.value)}
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+              placeholder="min 6 characters" minLength={6} required />
+            <p className="text-xs text-slate-500 mt-1">Share this with the trainer — they should change it after first login.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Expertise Areas (Optional)</label>
+            <input type="text" value={formData.expertise} onChange={e => set('expertise', e.target.value)}
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+              placeholder="e.g. Leadership, Soft Skills, Python" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Bio (Optional)</label>
+            <textarea value={formData.bio} onChange={e => set('bio', e.target.value)}
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+              rows="2" placeholder="Brief background about the trainer..." />
+          </div>
+          <div className="flex justify-end space-x-3 pt-2">
+            <button type="button" onClick={onClose}
+              className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" disabled={loading}
+              className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold disabled:opacity-60">
+              {loading ? 'Creating…' : 'Create Trainer'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// ─── UploadOnBehalfModal ──────────────────────────────────────────────────────
+
+const UploadOnBehalfModal = ({ onClose, onSuccess }) => {
+  const [trainers, setTrainers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [formData, setFormData] = useState({
+    trainerId: '', title: '', description: '', categoryId: '',
+    tags: '', trainingDate: '', trainingType: 'delivered', file: null,
+  });
+  const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const set = (k, v) => setFormData(p => ({ ...p, [k]: v }));
+
+  useEffect(() => {
+    adminApi.getActiveTrainers()
+      .then(d => setTrainers(d.users || []))
+      .catch(() => {});
+    materialsApi.getCategories()
+      .then(d => setCategories(d.categories || []))
+      .catch(() => {});
+  }, []);
+
+  const handleDrag = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    setDragActive(e.type === 'dragenter' || e.type === 'dragover');
+  };
+  const handleDrop = (e) => {
+    e.preventDefault(); e.stopPropagation(); setDragActive(false);
+    if (e.dataTransfer.files?.[0]) set('file', e.dataTransfer.files[0]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.file) { setError('Please select a file'); return; }
+    if (!formData.trainerId) { setError('Please select a trainer'); return; }
+    if (!formData.categoryId) { setError('Please select a category'); return; }
+    setError(''); setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', formData.file);
+      fd.append('title', formData.title);
+      fd.append('description', formData.description);
+      fd.append('categoryId', formData.categoryId);
+      fd.append('tags', formData.tags);
+      fd.append('trainingDate', formData.trainingDate);
+      fd.append('trainingType', formData.trainingType);
+      fd.append('trainerId', formData.trainerId);  // admin override
+      const data = await materialsApi.upload(fd);
+      onSuccess(data.material || {});
+    } catch (err) {
+      setError(err.message || 'Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const selectedTrainer = trainers.find(t => t.id === formData.trainerId);
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-white">Upload on Behalf of Trainer</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-6 h-6" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {error && (
+            <div className="flex items-center space-x-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3">
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <span className="text-sm text-red-400">{error}</span>
+            </div>
+          )}
+
+          {/* Trainer selector */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Assign to Trainer *</label>
+            <select value={formData.trainerId} onChange={e => set('trainerId', e.target.value)}
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+              required>
+              <option value="">Select a trainer</option>
+              {trainers.map(t => (
+                <option key={t.id} value={t.id}>{t.full_name} — {t.email}</option>
+              ))}
+            </select>
+            {selectedTrainer && (
+              <p className="text-xs text-green-400 mt-1">
+                ✓ Material will appear under {selectedTrainer.full_name}'s account
+              </p>
+            )}
+          </div>
+
+          {/* Drop zone */}
+          <div onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+              dragActive ? 'border-amber-500 bg-amber-500/10'
+              : formData.file ? 'border-green-500 bg-green-500/10'
+              : 'border-slate-600 bg-slate-900/50'
+            }`}>
+            <input type="file" id="behalf-file-upload" onChange={e => set('file', e.target.files?.[0] || null)}
+              className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.mp3,.zip" />
+            {formData.file ? (
+              <div className="space-y-2">
+                <CheckCircle className="w-12 h-12 text-green-400 mx-auto" />
+                <p className="text-white font-semibold">{formData.file.name}</p>
+                <p className="text-sm text-slate-400">{(formData.file.size / 1048576).toFixed(2)} MB</p>
+                <button type="button" onClick={() => set('file', null)} className="text-sm text-red-400 hover:text-red-300">Remove file</button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Upload className="w-12 h-12 text-slate-500 mx-auto" />
+                <div>
+                  <label htmlFor="behalf-file-upload" className="text-amber-400 hover:text-amber-300 cursor-pointer font-semibold">Click to upload</label>
+                  <span className="text-slate-400"> or drag and drop</span>
+                </div>
+                <p className="text-sm text-slate-500">PDF, DOCX, PPTX, XLSX, MP4, MP3, ZIP (max 1GB)</p>
+              </div>
+            )}
+          </div>
+
+          {/* Form fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">Title *</label>
+              <input type="text" value={formData.title} onChange={e => set('title', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                placeholder="e.g. Leadership Skills Workshop 2024" required />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">Description *</label>
+              <textarea value={formData.description} onChange={e => set('description', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                rows="3" placeholder="Describe what learners will gain..." required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Category *</label>
+              <select value={formData.categoryId} onChange={e => set('categoryId', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors" required>
+                <option value="">Select a category</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Tags (Optional)</label>
+              <input type="text" value={formData.tags} onChange={e => set('tags', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                placeholder="leadership, communication" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Training Date *</label>
+              <input type="date" value={formData.trainingDate} onChange={e => set('trainingDate', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors" required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Training Type *</label>
+              <select value={formData.trainingType} onChange={e => set('trainingType', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors" required>
+                <option value="delivered">Already Delivered</option>
+                <option value="upcoming">Upcoming</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-2">
+            <button type="button" onClick={onClose}
+              className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">Cancel</button>
+            <button type="submit"
+              disabled={uploading || !formData.file || !formData.trainerId || !formData.title || !formData.description || !formData.categoryId}
+              className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+              {uploading ? 'Uploading…' : 'Upload Material'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import {
   getPendingTrainers,
   approveTrainer,
   rejectTrainer,
+  createTrainer,
   getAllUsers,
   banUser,
   unbanUser,
@@ -16,6 +17,7 @@ const router = express.Router();
 router.use(authenticate, authorize('super_admin'));
 
 router.get('/trainers/pending', getPendingTrainers);
+router.post('/trainers', createTrainer);
 router.post('/trainers/:id/approve', approveTrainer);
 router.post('/trainers/:id/reject', rejectTrainer);
 router.get('/users', getAllUsers);

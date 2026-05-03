@@ -31,16 +31,22 @@ export const uploadMaterial = async (req, res) => {
     // Parse tags (comma-separated string to array)
     const tagsArray = tags ? tags.split(',').map(t => t.trim()) : [];
 
+    // Admin can upload on behalf of another trainer by passing trainerId
+    const uploaderId =
+      req.user.role === 'super_admin' && req.body.trainerId
+        ? req.body.trainerId
+        : req.user.id;
+
     // Insert material into database
     const result = await query(
       `INSERT INTO materials (
-        trainer_id, title, description, category_id, tags, 
+        trainer_id, title, description, category_id, tags,
         file_name, file_url, file_size, file_type, file_mime_type,
         training_date, training_type
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id, title, uploaded_at`,
       [
-        req.user.id,
+        uploaderId,
         title,
         description,
         categoryId,
