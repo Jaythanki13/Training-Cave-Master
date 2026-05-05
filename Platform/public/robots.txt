@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+
+Disallow: /learner
+Disallow: /trainer
+Disallow: /admin
+Disallow: /trainers/
+
+Sitemap: https://training-cave-master.vercel.app/sitemap.xml

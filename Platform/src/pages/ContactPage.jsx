@@ -1,217 +1,270 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   Mail, MessageSquare, Clock, CheckCircle, AlertCircle,
-  ChevronDown, ChevronUp, Send, BookOpen, User
+  ChevronDown, ChevronUp, Send, User, BookOpen, ArrowRight
 } from 'lucide-react';
 import PublicNavbar from '../components/PublicNavbar';
 import PublicFooter from '../components/PublicFooter';
+import SEO from '../components/SEO';
+import { contact as contactApi } from '../services/api';
 
 const SUPPORT_EMAIL = 'trainingcave013@gmail.com';
 
-// ─── Contact Form ─────────────────────────────────────────────────────────────
+/* ── Info cards ── */
+const INFO_CARDS = [
+  {
+    icon: Mail,
+    iconBg: 'bg-amber-100', iconColor: 'text-amber-600',
+    title: 'Email Us',
+    content: SUPPORT_EMAIL,
+    href: `mailto:${SUPPORT_EMAIL}`,
+    sub: 'We reply within 24–48 hours',
+  },
+  {
+    icon: Clock,
+    iconBg: 'bg-sky-100', iconColor: 'text-sky-600',
+    title: 'Response Time',
+    content: '24–48 Hours',
+    sub: 'Monday – Friday',
+  },
+  {
+    icon: MessageSquare,
+    iconBg: 'bg-emerald-100', iconColor: 'text-emerald-600',
+    title: 'Send a Message',
+    content: 'Use the form below',
+    sub: 'We'll get right back to you',
+  },
+];
+
+const InfoCards = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14">
+    {INFO_CARDS.map(({ icon: Icon, iconBg, iconColor, title, content, href, sub }) => (
+      <div key={title} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+        <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center mx-auto mb-4`}>
+          <Icon className={`w-6 h-6 ${iconColor}`} />
+        </div>
+        <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+        {href ? (
+          <a href={href} className="text-amber-600 hover:text-amber-700 text-sm font-medium break-all">{content}</a>
+        ) : (
+          <p className="text-slate-700 text-sm font-medium">{content}</p>
+        )}
+        <p className="text-slate-400 text-xs mt-1">{sub}</p>
+      </div>
+    ))}
+  </div>
+);
+
+/* ── Contact Form ── */
+const SUBJECTS = [
+  { value: '', label: 'Select a subject…' },
+  { value: 'general', label: 'General Enquiry' },
+  { value: 'technical', label: 'Technical Support' },
+  { value: 'trainer', label: 'Become a Trainer' },
+  { value: 'content', label: 'Content Issue' },
+  { value: 'billing', label: 'Billing / Account' },
+  { value: 'other', label: 'Other' },
+];
 
 const ContactForm = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
-  const [errorMsg, setErrorMsg] = useState('');
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+  const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus('loading');
-    setErrorMsg('');
+    if (!form.name || !form.email || !form.subject || !form.message) {
+      setStatus({ type: 'error', text: 'Please fill in all fields.' });
+      return;
+    }
+    setLoading(true);
+    setStatus(null);
     try {
-      const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const res = await fetch(`${BASE}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to send message');
-      setStatus('success');
+      await contactApi.submit(form);
+      setStatus({ type: 'success', text: "Message sent! We'll get back to you within 24–48 hours." });
       setForm({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
-      setStatus('error');
-      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+      setStatus({ type: 'error', text: err.message || 'Failed to send message. Please try again.' });
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (status === 'success') {
-    return (
-      <div className="text-center py-12">
-        <div className="w-20 h-20 bg-green-500/10 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-green-400" />
-        </div>
-        <h3 className="text-2xl font-bold text-white mb-3">Message sent!</h3>
-        <p className="text-slate-400 mb-6 max-w-sm mx-auto">We've received your message and will get back to you within 24–48 hours. Check your inbox for a confirmation.</p>
-        <button onClick={() => setStatus('idle')}
-          className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl transition-colors font-medium">
-          Send another message
-        </button>
-      </div>
-    );
-  }
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {status === 'error' && (
-        <div className="flex items-start space-x-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
-          <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-red-400">{errorMsg}</span>
+      {status && (
+        <div className={`flex items-start gap-3 p-4 rounded-xl text-sm ${
+          status.type === 'success'
+            ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+            : 'bg-red-50 border border-red-200 text-red-700'
+        }`}>
+          {status.type === 'success'
+            ? <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            : <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />}
+          <span>{status.text}</span>
         </div>
       )}
 
-      <div className="grid sm:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Your Name</label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input type="text" value={form.name} onChange={e => set('name', e.target.value)} required placeholder="John Doe"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors placeholder:text-slate-600" />
-          </div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> Your Name</span>
+          </label>
+          <input type="text" placeholder="Jane Smith" value={form.name} onChange={set('name')} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input type="email" value={form.email} onChange={e => set('email', e.target.value)} required placeholder="you@example.com"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors placeholder:text-slate-600" />
-          </div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> Email Address</span>
+          </label>
+          <input type="email" placeholder="jane@example.com" value={form.email} onChange={set('email')} className={inputCls} />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Subject</label>
-        <select value={form.subject} onChange={e => set('subject', e.target.value)} required
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 transition-colors appearance-none text-white">
-          <option value="" disabled className="text-slate-500">Select a topic...</option>
-          <option value="General Enquiry">General Enquiry</option>
-          <option value="Trainer Application">Trainer Application</option>
-          <option value="Technical Issue">Technical Issue</option>
-          <option value="Content Report">Content Report</option>
-          <option value="Account Help">Account Help</option>
-          <option value="Partnership / Collaboration">Partnership / Collaboration</option>
-          <option value="Other">Other</option>
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">Subject</label>
+        <select value={form.subject} onChange={set('subject')} className={inputCls}>
+          {SUBJECTS.map(({ value, label }) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
         </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Message</label>
-        <textarea value={form.message} onChange={e => set('message', e.target.value)} required rows={5}
-          placeholder="Tell us how we can help..."
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-amber-500 transition-colors placeholder:text-slate-600" />
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">
+          <span className="flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Message</span>
+        </label>
+        <textarea
+          rows={5}
+          placeholder="How can we help you today?"
+          value={form.message}
+          onChange={set('message')}
+          className={`${inputCls} resize-none`}
+        />
       </div>
 
-      <button type="submit" disabled={status === 'loading'}
-        className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3.5 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/20 disabled:opacity-60 flex items-center justify-center space-x-2">
-        <Send className="w-4 h-4" />
-        <span>{status === 'loading' ? 'Sending...' : 'Send Message'}</span>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-60 shadow-sm hover:shadow-md"
+      >
+        {loading ? (
+          <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending…</>
+        ) : (
+          <><Send className="w-4 h-4" /> Send Message</>
+        )}
       </button>
     </form>
   );
 };
 
-// ─── FAQ ──────────────────────────────────────────────────────────────────────
-
-const faqs = [
-  { q: 'How do I become a trainer on Training Cave?', a: 'Click "Get Started" on the home page, choose "Trainer" as your role, fill in your details, and submit. Our team reviews all trainer applications and will notify you by email once approved — usually within 1–2 business days.' },
-  { q: 'Is Training Cave free to use?', a: 'Yes, completely. Learners can browse and download all materials for free. There are no subscription fees, no hidden charges. Trainers can upload content at no cost.' },
-  { q: 'What file formats are supported?', a: 'We support PDF, PowerPoint (PPTX), Word (DOCX), Excel (XLSX), MP4 video, AVI, MOV, MP3 audio, ZIP archives, and common code/data files (JSON, CSV, SQL, Python, JavaScript, Java). Each file can be up to 1 GB.' },
-  { q: 'How are downloads secured?', a: 'All files are stored on AWS S3 with no public access. When you click download, we generate a time-limited signed URL (valid for 1 hour) that only you can use. This means your content is never accessible without authentication.' },
-  { q: 'Can I upload content as a learner?', a: 'No. Only approved trainers and administrators can upload materials. This ensures quality control and that every piece of content comes from a verified source.' },
-  { q: 'How do I report inappropriate content?', a: "Use the Contact form on this page and select 'Content Report' as the subject. Describe the material in question and we'll review it promptly." },
+/* ── FAQ ── */
+const FAQS = [
+  { q: 'How do I become a trainer?', a: 'Apply via the Contact form selecting "Become a Trainer". Our team will review your application and get back within 48 hours.' },
+  { q: 'Are the materials free to download?', a: 'Access to materials requires a free learner account. Once registered and approved, you can download any active material.' },
+  { q: 'What file types are supported?', a: 'Trainers can upload PDF, DOCX, PPTX, XLSX, MP4, and ZIP files. All uploads are virus-scanned before publishing.' },
+  { q: 'How long do signed download links last?', a: 'Download links are valid for 60 minutes from the moment you click "Download". This keeps your content secure.' },
+  { q: 'Can I rate a material I downloaded?', a: 'Yes! After downloading, a rating button appears on every material card so you can leave a 1–5 star review.' },
 ];
 
 const FAQ = () => {
   const [open, setOpen] = useState(null);
   return (
-    <section className="py-20 bg-slate-950">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-3">Frequently Asked Questions</h2>
-          <p className="text-slate-400">Can't find your answer? <a href={`mailto:${SUPPORT_EMAIL}`} className="text-amber-400 hover:text-amber-300">Email us directly.</a></p>
-        </div>
-        <div className="space-y-3">
-          {faqs.map((faq, i) => (
-            <div key={i} className={`bg-slate-800/50 border rounded-2xl transition-all overflow-hidden ${open === i ? 'border-amber-500/40' : 'border-slate-700'}`}>
-              <button onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between px-6 py-4 text-left">
-                <span className={`font-medium text-sm sm:text-base ${open === i ? 'text-amber-400' : 'text-white'}`}>{faq.q}</span>
-                {open === i ? <ChevronUp className="w-4 h-4 text-amber-400 flex-shrink-0 ml-4" /> : <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0 ml-4" />}
-              </button>
-              {open === i && (
-                <div className="px-6 pb-5">
-                  <p className="text-slate-400 text-sm leading-relaxed">{faq.a}</p>
-                </div>
-              )}
+    <div className="space-y-3">
+      {FAQS.map((faq, i) => (
+        <div key={i} className="border border-slate-200 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setOpen(open === i ? null : i)}
+            className="w-full flex items-center justify-between px-5 py-4 text-left bg-white hover:bg-slate-50 transition-colors"
+          >
+            <span className="font-medium text-slate-900 text-sm pr-4">{faq.q}</span>
+            {open === i
+              ? <ChevronUp className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              : <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />}
+          </button>
+          {open === i && (
+            <div className="px-5 pb-4 bg-white">
+              <p className="text-slate-500 text-sm leading-relaxed">{faq.a}</p>
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    </section>
+      ))}
+    </div>
   );
 };
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
+/* ── Page ── */
 const ContactPage = () => (
-  <div className="min-h-screen bg-slate-950">
+  <div className="min-h-screen bg-slate-50">
+    <SEO
+      title="Contact Us"
+      description="Get in touch with the Training Cave team. We're here to help with any questions about our platform."
+      path="/contact"
+    />
     <PublicNavbar />
 
     {/* Hero */}
-    <section className="relative pt-32 pb-16 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-amber-500/5 rounded-full blur-3xl" />
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center space-x-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm px-4 py-1.5 rounded-full mb-6">
-          <MessageSquare className="w-3.5 h-3.5" />
-          <span>We're here to help</span>
-        </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">Get in Touch</h1>
-        <p className="text-xl text-slate-400 max-w-xl mx-auto">Have a question, feedback, or need support? We read every message and respond within 24–48 hours.</p>
+    <section className="py-16 bg-white border-b border-slate-100">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <span className="inline-block text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">Get in Touch</span>
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4">
+          We'd Love to{' '}
+          <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">Hear From You</span>
+        </h1>
+        <p className="text-slate-500 text-lg">Have a question, suggestion, or want to join as a trainer? Drop us a line and we'll be back within 48 hours.</p>
       </div>
     </section>
 
-    {/* Contact info cards */}
-    <section className="py-10 bg-slate-900">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid sm:grid-cols-3 gap-4">
-          {[
-            { icon: Mail, title: 'Email Support', value: SUPPORT_EMAIL, sub: 'Direct inbox, no bot', href: `mailto:${SUPPORT_EMAIL}`, color: 'text-amber-400 border-amber-500/30 bg-amber-500/5' },
-            { icon: Clock, title: 'Response Time', value: '24 – 48 hours', sub: 'Monday to Friday', color: 'text-blue-400 border-blue-500/30 bg-blue-500/5' },
-            { icon: BookOpen, title: 'Platform Help', value: 'Check the FAQ below', sub: 'Most answers are there', color: 'text-green-400 border-green-500/30 bg-green-500/5' },
-          ].map(({ icon: Icon, title, value, sub, href, color }) => (
-            <div key={title} className={`border rounded-2xl p-5 ${color}`}>
-              <Icon className="w-7 h-7 mb-3 opacity-80" />
-              <div className="text-white font-semibold text-sm mb-1">{title}</div>
-              {href
-                ? <a href={href} className="text-sm hover:opacity-80 transition-opacity block truncate">{value}</a>
-                : <div className="text-sm">{value}</div>
-              }
-              <div className="text-xs opacity-50 mt-0.5">{sub}</div>
+    <section className="py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <InfoCards />
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+          {/* Form */}
+          <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                <Send className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Send a Message</h2>
+                <p className="text-slate-400 text-xs">We reply within 24–48 hours</p>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    {/* Form + FAQ side-by-side */}
-    <section className="py-16 bg-slate-950">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-slate-800/50 border border-slate-700 rounded-3xl p-6 sm:p-10">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Send us a message</h2>
-            <p className="text-slate-400 text-sm">We'll send you a confirmation email and follow up shortly.</p>
+            <ContactForm />
           </div>
-          <ContactForm />
+
+          {/* FAQ */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-sky-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">FAQ</h2>
+                <p className="text-slate-400 text-xs">Quick answers to common questions</p>
+              </div>
+            </div>
+            <FAQ />
+
+            {/* Direct email nudge */}
+            <div className="mt-6 p-5 bg-amber-50 border border-amber-100 rounded-2xl">
+              <p className="text-sm font-semibold text-slate-900 mb-1">Prefer email?</p>
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center gap-1.5 group">
+                <Mail className="w-4 h-4" />
+                {SUPPORT_EMAIL}
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </a>
+              <p className="text-slate-400 text-xs mt-1">Response within 24–48 hours</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <FAQ />
     <PublicFooter />
   </div>
 );
