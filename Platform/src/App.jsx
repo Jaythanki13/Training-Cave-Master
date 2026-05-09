@@ -34,8 +34,8 @@ function dashboardFor(role) {
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
     </div>
   )
 }
