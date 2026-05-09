@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd Platform && npm install && npm run build",
-  "outputDirectory": "Platform/dist",
-  "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
