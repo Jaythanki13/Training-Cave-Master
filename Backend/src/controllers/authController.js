@@ -206,17 +206,29 @@ export const getProfile = async (req, res) => {
 // Update user profile
 export const updateProfile = async (req, res) => {
   try {
-    const { fullName, bio, expertise } = req.body;
-    
+    const { fullName, bio, expertise, email } = req.body;
+
+    if (email) {
+      const emailLower = email.toLowerCase();
+      const conflict = await query(
+        'SELECT id FROM users WHERE email = $1 AND id != $2',
+        [emailLower, req.user.id]
+      );
+      if (conflict.rows.length > 0) {
+        return res.status(409).json({ error: 'Email already in use by another account' });
+      }
+    }
+
     const result = await query(
-      `UPDATE users 
+      `UPDATE users
        SET full_name = COALESCE($1, full_name),
            profile_bio = COALESCE($2, profile_bio),
            expertise_areas = COALESCE($3, expertise_areas),
+           email = COALESCE($4, email),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $4
+       WHERE id = $5
        RETURNING id, email, full_name, role, profile_bio, expertise_areas`,
-      [fullName, bio, expertise, req.user.id]
+      [fullName || null, bio || null, expertise || null, email ? email.toLowerCase() : null, req.user.id]
     );
 
     res.json({

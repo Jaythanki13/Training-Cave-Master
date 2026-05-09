@@ -4,10 +4,10 @@ import {
   Shield, Users, BookOpen, Download, TrendingUp, CheckCircle, XCircle,
   Clock, Search, Trash2, UserCheck, UserX, BarChart3, Calendar,
   AlertTriangle, LogOut, AlertCircle, Star, FileText, Plus,
-  Upload, X, Video, Music, Archive
+  Upload, X, Video, Music, Archive, Settings, Lock, Mail, User
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { admin as adminApi, materials as materialsApi } from '../services/api';
+import { admin as adminApi, materials as materialsApi, auth as authApi } from '../services/api';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -224,6 +224,8 @@ const AdminPanel = () => {
             icon={<BookOpen className="w-4 h-4" />} label="All Materials" />
           <TabButton active={selectedTab === 'analytics'} onClick={() => setSelectedTab('analytics')}
             icon={<BarChart3 className="w-4 h-4" />} label="Analytics" />
+          <TabButton active={selectedTab === 'settings'} onClick={() => setSelectedTab('settings')}
+            icon={<Settings className="w-4 h-4" />} label="Account Settings" />
         </div>
 
         {/* ── Pending Trainers ── */}
@@ -434,6 +436,11 @@ const AdminPanel = () => {
         {selectedTab === 'analytics' && (
           <AnalyticsTab stats={stats} loading={statsLoading} />
         )}
+
+        {/* ── Account Settings ── */}
+        {selectedTab === 'settings' && (
+          <AccountSettingsTab user={user} />
+        )}
       </div>
 
       {/* Create Trainer Modal */}
@@ -480,6 +487,181 @@ const AdminPanel = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// ─── AccountSettingsTab ───────────────────────────────────────────────────────
+
+const AccountSettingsTab = ({ user }) => {
+  const [profileForm, setProfileForm] = useState({ fullName: user?.full_name || '', email: user?.email || '' });
+  const [profileStatus, setProfileStatus] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwStatus, setPwStatus] = useState(null);
+  const [pwLoading, setPwLoading] = useState(false);
+
+  const handleProfileSave = async (e) => {
+    e.preventDefault();
+    if (!profileForm.fullName || !profileForm.email) {
+      setProfileStatus({ type: 'error', text: 'Name and email are required.' });
+      return;
+    }
+    setProfileLoading(true);
+    setProfileStatus(null);
+    try {
+      await authApi.updateProfile({ fullName: profileForm.fullName, email: profileForm.email });
+      setProfileStatus({ type: 'success', text: 'Profile updated. Please log in again to see the new email.' });
+    } catch (err) {
+      setProfileStatus({ type: 'error', text: err.message || 'Failed to update profile.' });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (!pwForm.currentPassword || !pwForm.newPassword) {
+      setPwStatus({ type: 'error', text: 'All password fields are required.' });
+      return;
+    }
+    if (pwForm.newPassword.length < 8) {
+      setPwStatus({ type: 'error', text: 'New password must be at least 8 characters.' });
+      return;
+    }
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwStatus({ type: 'error', text: 'New passwords do not match.' });
+      return;
+    }
+    setPwLoading(true);
+    setPwStatus(null);
+    try {
+      await authApi.changePassword(pwForm.currentPassword, pwForm.newPassword);
+      setPwStatus({ type: 'success', text: 'Password changed successfully!' });
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setPwStatus({ type: 'error', text: err.message || 'Failed to change password.' });
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+  const StatusBanner = ({ status }) => status ? (
+    <div className={`flex items-start gap-3 p-4 rounded-xl text-sm mb-4 ${
+      status.type === 'success'
+        ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+        : 'bg-red-50 border border-red-200 text-red-700'
+    }`}>
+      {status.type === 'success'
+        ? <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+        : <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
+      <span>{status.text}</span>
+    </div>
+  ) : null;
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      {/* Profile Info */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center">
+            <User className="w-5 h-5 text-violet-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 text-sm">Profile Information</h3>
+            <p className="text-slate-400 text-xs">Update your name and email address</p>
+          </div>
+        </div>
+        <form onSubmit={handleProfileSave} className="p-6 space-y-4">
+          <StatusBanner status={profileStatus} />
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+            <input
+              type="text"
+              value={profileForm.fullName}
+              onChange={e => setProfileForm(f => ({ ...f, fullName: e.target.value }))}
+              className={inputCls}
+              placeholder="Your full name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+            <input
+              type="email"
+              value={profileForm.email}
+              onChange={e => setProfileForm(f => ({ ...f, email: e.target.value }))}
+              className={inputCls}
+              placeholder="your@email.com"
+            />
+            <p className="text-xs text-slate-400 mt-1">You will need to log in again after changing your email.</p>
+          </div>
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={profileLoading}
+              className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all font-semibold disabled:opacity-60 text-sm"
+            >
+              {profileLoading ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Change Password */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
+            <Lock className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 text-sm">Change Password</h3>
+            <p className="text-slate-400 text-xs">Choose a strong password (min 8 characters)</p>
+          </div>
+        </div>
+        <form onSubmit={handlePasswordChange} className="p-6 space-y-4">
+          <StatusBanner status={pwStatus} />
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Current Password</label>
+            <input
+              type="password"
+              value={pwForm.currentPassword}
+              onChange={e => setPwForm(f => ({ ...f, currentPassword: e.target.value }))}
+              className={inputCls}
+              placeholder="Enter current password"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password</label>
+            <input
+              type="password"
+              value={pwForm.newPassword}
+              onChange={e => setPwForm(f => ({ ...f, newPassword: e.target.value }))}
+              className={inputCls}
+              placeholder="Min 8 characters"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirm New Password</label>
+            <input
+              type="password"
+              value={pwForm.confirmPassword}
+              onChange={e => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))}
+              className={inputCls}
+              placeholder="Repeat new password"
+            />
+          </div>
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={pwLoading}
+              className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all font-semibold disabled:opacity-60 text-sm"
+            >
+              {pwLoading ? 'Updating…' : 'Update Password'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
