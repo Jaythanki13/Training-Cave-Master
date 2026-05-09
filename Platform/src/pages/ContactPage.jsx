@@ -32,7 +32,7 @@ const INFO_CARDS = [
     iconBg: 'bg-emerald-100', iconColor: 'text-emerald-600',
     title: 'Send a Message',
     content: 'Use the form below',
-    sub: 'We'll get right back to you',
+    sub: "We'll get right back to you",
   },
 ];
 
